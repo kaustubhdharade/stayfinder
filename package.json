@@ -1,0 +1,27 @@
+{
+  "name": "stayfinder",
+  "version": "0.1.0",
+  "private": true,
+  "description": "StayFinder - Production-grade Hotel Discovery & Booking Platform (Trivago-style)",
+  "scripts": {
+    "dev:client": "npm --prefix client run dev",
+    "dev:server": "npm --prefix server run dev",
+    "build:client": "npm --prefix client run build",
+    "test": "npm --prefix client test && npm --prefix server test",
+    "test:client": "npm --prefix client test",
+    "test:server": "npm --prefix server test",
+    "prisma:generate": "npm --prefix server run prisma:generate"
+  },
+  "keywords": [
+    "hotel-booking",
+    "hotel-discovery",
+    "react",
+    "vite",
+    "express",
+    "prisma",
+    "postgresql",
+    "stayfinder"
+  ],
+  "author": "",
+  "license": "ISC"
+}

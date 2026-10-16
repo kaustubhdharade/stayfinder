@@ -1,0 +1,124 @@
+// StayFinder Prisma Schema
+// Relational Database Architecture for Hotel Discovery
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Hotel {
+  id                String         @id @default(uuid())
+  name              String
+  slug              String         @unique
+  description       String         @db.Text
+  address           String
+  city              String
+  state             String?
+  country           String
+  latitude          Float?
+  longitude         Float?
+  starRating        Int            @default(4)
+  propertyType      String         @default("Hotel") // Hotel, Resort, Boutique, Apartment
+  ratingScore       Float          @default(0.0)
+  ratingWord        String?        @default("Good") // Exceptional, Wonderful, Very Good, etc.
+  reviewCount       Int            @default(0)
+  contactPhone      String?
+  contactEmail      String?
+  featured          Boolean        @default(false)
+  freeCancellation  Boolean        @default(true)
+  breakfastIncluded Boolean        @default(false)
+  
+  // Lowest indicative price in minor currency units (cents, e.g. 19500 = $195.00)
+  minPrice          Int            @default(0)
+  currency          String         @default("USD")
+
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+
+  // Relationships
+  images            HotelImage[]
+  amenities         HotelAmenity[]
+  roomTypes         RoomType[]
+
+  @@index([city])
+  @@index([country])
+  @@index([propertyType])
+  @@index([starRating])
+  @@index([ratingScore])
+  @@index([minPrice])
+}
+
+model HotelImage {
+  id           String   @id @default(uuid())
+  hotelId      String
+  imageUrl     String
+  altText      String?
+  displayOrder Int      @default(0)
+  createdAt    DateTime @default(now())
+
+  hotel        Hotel    @relation(fields: [hotelId], references: [id], onDelete: Cascade)
+
+  @@index([hotelId])
+  @@index([displayOrder])
+}
+
+model Amenity {
+  id        String         @id @default(uuid())
+  name      String         @unique
+  category  String?        @default("General") // General, Wellness, Dining, Room
+  createdAt DateTime       @default(now())
+
+  hotels    HotelAmenity[]
+  rooms     RoomAmenity[]
+}
+
+model HotelAmenity {
+  hotelId   String
+  amenityId String
+
+  hotel     Hotel   @relation(fields: [hotelId], references: [id], onDelete: Cascade)
+  amenity   Amenity @relation(fields: [amenityId], references: [id], onDelete: Cascade)
+
+  @@id([hotelId, amenityId])
+  @@index([amenityId])
+}
+
+model RoomType {
+  id               String        @id @default(uuid())
+  hotelId          String
+  name             String
+  description      String?       @db.Text
+  capacity         Int           @default(2)
+  bedConfiguration String        @default("1 King Bed")
+  
+  // Base price in integer minor currency units (cents, e.g. 24000 = $240.00 USD)
+  basePrice        Int
+  currency         String        @default("USD")
+  totalInventory   Int           @default(1)
+  isActive         Boolean       @default(true)
+  
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+
+  hotel            Hotel         @relation(fields: [hotelId], references: [id], onDelete: Cascade)
+  amenities        RoomAmenity[]
+
+  @@index([hotelId])
+  @@index([basePrice])
+  @@index([isActive])
+}
+
+model RoomAmenity {
+  roomTypeId String
+  amenityId  String
+
+  roomType   RoomType @relation(fields: [roomTypeId], references: [id], onDelete: Cascade)
+  amenity    Amenity  @relation(fields: [amenityId], references: [id], onDelete: Cascade)
+
+  @@id([roomTypeId, amenityId])
+  @@index([amenityId])
+}
